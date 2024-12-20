@@ -4,7 +4,7 @@ import com.reljicd.model.Product;
 
 public class NotEnoughProductsInStockException extends Exception {
 
-    public static final String DEFAULT_MESSAGE = "Not enough products in stock";
+    private static final String DEFAULT_MESSAGE = "Not enough products in stock";
 
     public NotEnoughProductsInStockException() {
         super(DEFAULT_MESSAGE);
