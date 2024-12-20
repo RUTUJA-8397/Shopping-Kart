@@ -1,28 +1,47 @@
 package com.reljicd.controller;
 
-import org.springframework.boot.autoconfigure.web.ErrorController;
+import com.reljicd.model.Product;
+import com.reljicd.service.ProductService;
+import com.reljicd.util.Pager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-@RestController
-public class CustomErrorController implements ErrorController {
+import java.util.Optional;
 
-    private static final String PATH = "/error";
+@Controller
+public class HomeController {
 
-    @RequestMapping(PATH)
-    public ModelAndView error() {
-        return new ModelAndView("/error");
+    private static final int INITIAL_PAGE = 0;
+
+    private final ProductService productService;
+
+    @Autowired
+    public HomeController(ProductService productService) {
+        this.productService = productService;
     }
 
-    @GetMapping("/403")
-    public ModelAndView error403() {
-        return new ModelAndView("/403");
+    @GetMapping("/home")
+    public ModelAndView home(@RequestParam("page") Optional<Integer> page) {
+
+        // Evaluate page. If requested parameter is null or less than 0 (to
+        // prevent exception), return initial size. Otherwise, return value of
+        // param. decreased by 1.
+        int evalPage = (page.orElse(0) < 1) ? INITIAL_PAGE : page.get() - 1;
+
+        Page<Product> products = productService.findAllProductsPageable(new PageRequest(evalPage, 5));
+        Pager pager = new Pager(products);
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("products", products);
+        modelAndView.addObject("pager", pager);
+        modelAndView.setViewName("/home");
+        return modelAndView;
     }
 
-    @Override
-    public String getErrorPath() {
-        return PATH;
-    }
 }
+
